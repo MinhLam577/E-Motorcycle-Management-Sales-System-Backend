@@ -1,10 +1,8 @@
 import {
   Body,
   Controller,
-  Get,
   Param,
   ParseIntPipe,
-  ParseUUIDPipe,
   Post,
   Req,
 } from '@nestjs/common';

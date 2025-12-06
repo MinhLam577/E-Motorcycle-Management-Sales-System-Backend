@@ -28,6 +28,7 @@ import {
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { API_Header_Content_Type_Format } from 'src/constants';
 import { ZaloPayCheckOrderStatus } from 'src/constants/zalo-payment.enum';
+import appConfig from 'src/config/app.config';
 interface CreateZaloPayOrderDto {
   app_id: number;
   app_user: string;
@@ -48,13 +49,16 @@ interface CreateZaloPayOrderDto {
   address?: string;
 }
 
-const redirectUrl = 'https://otohongson-admin.vercel.app/';
+const redirectUrl = `${appConfig().FE_URL_USER}/purchase`;
 export const callback_url = `${process.env.DEPLOYMENT_URL}/api/v1/zalo-payment/callback`;
 export const ZaloPay_query_url = 'https://sb-openapi.zalopay.vn/v2/query';
 const cancel_url = 'https://sb-openapi.zalopay.vn/v2/cancel';
 export const appId = 2553;
 export const key1 = 'PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL';
 export const key2 = 'kLtgPl8HHhfvMuDHPwKfgfsY4Ydm9eIz';
+// export const appId = 554;
+// export const key1 = '8NdU5pG5R2spGHGhyO99HN1OhD8IQJBn';
+// export const key2 = 'uUfsWgfLkRLzq6W2uNXTCxrfxs51auny';
 export const createOrderZaloPayURL = 'https://sb-openapi.zalopay.vn/v2/create';
 const refundOrderZaloPayEndPoint = 'https://sb-openapi.zalopay.vn/v2/refund';
 const queryRefundEndPoint = 'https://sb-openapi.zalopay.vn/v2/query_refund';
@@ -327,6 +331,7 @@ export class ZaloPaymentService {
         };
       });
     } catch (e) {
+      console.error('Create order zalopay failed: ', e);
       throw e;
     }
   }

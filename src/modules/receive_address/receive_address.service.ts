@@ -129,6 +129,7 @@ export class ReceiveAddressService extends BaseService<
         data: transformResult,
       };
     } catch (e) {
+      console.error('Lỗi tạo địa chỉ: ', e);
       if (
         e instanceof Object &&
         e !== null &&

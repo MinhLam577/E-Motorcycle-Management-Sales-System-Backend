@@ -18,8 +18,8 @@ import { Voucher } from '../vourchers/entities/vourcher.entity';
 import { UserVourcher } from '../user_vourcher/entities/user_vourcher.entity';
 import appConfig from 'src/config/app.config';
 
-const return_success_url = `${appConfig().BE_URL}/purchase`;
-const cancel_url = `${appConfig().BE_URL}/purchase`;
+const return_success_url = `${appConfig().FE_URL_USER}/purchase`;
+const cancel_url = `${appConfig().FE_URL_USER}/purchase`;
 export interface ItemPayOsOrderDto {
   name: string; //Tên sản phẩm
   quantity: number; //Số lượng sản phẩm
@@ -37,7 +37,7 @@ export interface CreateOrderPayOsDto {
   buyerEmail?: string; //Email của người mua hàng. Thông tin dùng trong trường hợp tích hợp tạo hoá đơn điện tử.
   buyerPhone?: string; //Số điện thoại người mua hàng. Thông tin dùng trong trường hợp tích hợp tạo hoá đơn điện tử.
   buyerAddress?: string; //Địa chỉ của người mua hàng. Thông tin dùng trong trường hợp tích hợp tạo hoá đơn điện tử.
-  item?: ItemPayOsOrderDto[]; //Danh sách sản phẩm trong đơn hàng. Tối đa 20 sản phẩm.
+  items?: ItemPayOsOrderDto[]; //Danh sách sản phẩm trong đơn hàng. Tối đa 20 sản phẩm.
   expiredAt?: number; // Thời gian hết hạn của link thanh toán, là Unix Timestamp và kiểu Int32
 }
 
@@ -198,7 +198,7 @@ export class PayosService {
             (item) => ({
               name: item.skus.name,
               quantity: item.quantity,
-              price: item.skus.price_sold,
+              price: Number(item.skus.price_sold),
             }),
           );
           const orderCode = await this.generateUniqueNumberWithFindAll();
@@ -224,7 +224,7 @@ export class PayosService {
             createOrderDto.buyerPhone = user.phone;
           }
           if (orderDetail.length > 0) {
-            createOrderDto.item = orderDetail;
+            createOrderDto.items = orderDetail;
           }
           const expiredAt = this.generateExpiredAt();
           createOrderDto.expiredAt = expiredAt;
@@ -251,6 +251,7 @@ export class PayosService {
           order.payment_url = checkoutUrl;
           order.payment_url_expired = new Date(timeExpired * 1000);
 
+          await manager.save(order);
           const newPaymentTransaction = manager.create(PaymentTransaction, {
             payment_order_id: codeOrder,
             status: payment_status.PENDING,
@@ -309,23 +310,20 @@ export class PayosService {
                 }
               },
             );
-            manager.save(savedUserVouchers);
+            await manager.save(savedUserVouchers);
           }
+          await manager.save(newPaymentTransaction);
 
-          await Promise.all([
-            manager.save(order),
-            manager.save(newPaymentTransaction),
-          ]);
           return {
             status: 200,
-            message: 'Tạo đơn hàng thành công',
+            message: 'Tạo link thanh toán thành công',
             data: {
               order_id: order.id,
               payment_order_id: newPaymentTransaction.payment_order_id,
               transaction_id: newPaymentTransaction.transaction_id,
               order_details: orderDetail,
               total_amount: order.total_price,
-              discount_amount: order.discount_price,
+              discount_amount: order.discount_price || 0,
               description: defaultDescription,
               checkoutUrl: checkoutUrl,
               qrCode: qrCode,
@@ -334,6 +332,7 @@ export class PayosService {
         },
       );
     } catch (error) {
+      console.error('Lỗi khi tạo order payos: ', error);
       throw error;
     }
   }

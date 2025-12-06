@@ -333,6 +333,7 @@ export class OrderService {
         };
       });
     } catch (e) {
+      console.error('Create order from cart failed: ', e);
       throw e;
     }
   }

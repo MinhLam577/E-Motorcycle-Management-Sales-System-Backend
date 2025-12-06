@@ -251,28 +251,56 @@ export class AuthService {
     refresh_token: string;
     user: UserResponse;
   }> {
-    const { email, password } = userInfo;
-    let user: User | Customer;
+    try {
+      const { email, password } = userInfo;
+      let user: User | Customer;
 
-    // Kiểm tra người dùng
-    if (config.isAdmin) {
-      user = await this.userService.getUser1(email);
-    } else {
-      user = await this.CustomersService.getCustomerByEmail(email);
+      // Kiểm tra người dùng
+      if (config.isAdmin) {
+        user = await this.userService.getUser1(email);
+      } else {
+        user = await this.CustomersService.getCustomerByEmail(email);
+      }
+      if (!user) {
+        throw new UnauthorizedException('Email hoặc mật khẩu không chính xác');
+      }
+      if (!user.password) {
+        if (!password) {
+          throw new BadRequestException(
+            'Tài khoản của bạn được tạo qua Google. Vui lòng nhập mật khẩu để đặt lần đầu và tiếp tục đăng nhập.',
+          );
+        }
+        const hashedPassword = hashPasswordFunc({
+          password,
+        });
+        user.password = hashedPassword;
+        if (config.isAdmin) {
+          await this.usersRepository.update((user as User).id, {
+            password: hashedPassword,
+          });
+        } else {
+          await this.CustomerRepository.update((user as Customer).id, {
+            password: hashedPassword,
+          });
+        }
+        return await this.generateTokenAndResponse(user);
+      }
+      const isPasswordValid = compareSync(password, user.password);
+      if (!isPasswordValid) {
+        throw new UnauthorizedException('Email hoặc mật khẩu không chính xác');
+      }
+
+      // Kiểm tra trạng thái kích hoạt
+      if (!user.isActice) {
+        throw new UnauthorizedException('Tài khoản chưa được kích hoạt');
+      }
+
+      // Sinh token và response
+      return await this.generateTokenAndResponse(user);
+    } catch (e) {
+      console.error('Login Failed: ', e);
+      throw e;
     }
-
-    const isLoginSuccess: boolean =
-      !!user && compareSync(password, user.password);
-    if (!isLoginSuccess)
-      throw new UnauthorizedException('Email hoặc mật khẩu không chính xác');
-
-    // Kiểm tra trạng thái kích hoạt
-    if (!user.isActice) {
-      throw new UnauthorizedException('Tài khoản chưa được kích hoạt');
-    }
-
-    // Sinh token và response
-    return await this.generateTokenAndResponse(user);
   }
 
   // login customer
@@ -390,8 +418,8 @@ export class AuthService {
             );
           }
           const activationLink = config.isAdmin
-            ? `${appConfig().FE_URL_ADMIN}/verify-code?codeId=${codeId}&id=${user.id}`
-            : `${appConfig().FE_URL_USER}/verify-code?codeId=${codeId}&id=${user.id}`;
+            ? `${appConfig().FE_URL_ADMIN}/verify-code?codeId=${codeId}&id=${savedEntity.id}`
+            : `${appConfig().FE_URL_USER}/verify-code?codeId=${codeId}&id=${savedEntity.id}`;
           await this.sendMail({
             to: email,
             subject: 'Kích hoạt tài khoản',
