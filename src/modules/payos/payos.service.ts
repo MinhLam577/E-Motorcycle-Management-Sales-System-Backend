@@ -251,6 +251,7 @@ export class PayosService {
           order.payment_url = checkoutUrl;
           order.payment_url_expired = new Date(timeExpired * 1000);
 
+          await manager.save(order);
           const newPaymentTransaction = manager.create(PaymentTransaction, {
             payment_order_id: codeOrder,
             status: payment_status.PENDING,
@@ -309,23 +310,20 @@ export class PayosService {
                 }
               },
             );
-            manager.save(savedUserVouchers);
+            await manager.save(savedUserVouchers);
           }
+          await manager.save(newPaymentTransaction);
 
-          await Promise.all([
-            manager.save(order),
-            manager.save(newPaymentTransaction),
-          ]);
           return {
             status: 200,
-            message: 'Tạo đơn hàng thành công',
+            message: 'Tạo link thanh toán thành công',
             data: {
               order_id: order.id,
               payment_order_id: newPaymentTransaction.payment_order_id,
               transaction_id: newPaymentTransaction.transaction_id,
               order_details: orderDetail,
               total_amount: order.total_price,
-              discount_amount: order.discount_price,
+              discount_amount: order.discount_price || 0,
               description: defaultDescription,
               checkoutUrl: checkoutUrl,
               qrCode: qrCode,
