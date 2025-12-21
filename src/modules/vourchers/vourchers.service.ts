@@ -139,7 +139,6 @@ export class VourchersService {
       Object.assign(voucher, dataUpdate);
 
       // Nếu có truyền type_voucher_id thì kiểm tra và gán quan hệ
-      console.log(type_voucher_id);
       if (type_voucher_id) {
         const typeVoucher = await this.typeVoucherRepository.findOne({
           where: { id: type_voucher_id },
@@ -238,8 +237,6 @@ export class VourchersService {
       is_used: false,
       used_at: null,
     });
-
-    console.log(getvoucher);
 
     await this.userVoucherRepository.save(saleVoucher);
     await this.voucherRepository.increment(

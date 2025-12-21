@@ -147,7 +147,6 @@ export class CustomersController {
     example: 'cff60da5-700b-4bed-96d5-57738488a7d7',
   })
   delete(@Param('id') id: string) {
-    console.log(id);
     return this.customersService.remove(id);
   }
 
