@@ -1,9 +1,9 @@
-import { Controller, Get, Query, UsePipes } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { DistrictService } from './district.service';
-import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Tag } from 'src/constants/api-tag.enum';
 import { Public } from 'src/decorators/public-route';
-import { OptionalValidationPipe } from 'src/pipe/optional-validation.pipe';
+import { PositiveIntPipe } from 'src/pipe/positive-integer.pipe';
 
 @Controller('district')
 @ApiTags(Tag.DISTRICT)
@@ -11,53 +11,16 @@ import { OptionalValidationPipe } from 'src/pipe/optional-validation.pipe';
 export class DistrictController {
   constructor(private districtService: DistrictService) {}
 
-  @Get()
+  @Get(':provinceCode')
   @ApiOperation({
-    summary: 'Get all district or search by name, Id of province',
+    summary: 'Get district by province code',
     description: `Get all district by filters \n
-        provinceId: id of province \n
-        page: current page (optional, default: 0) \n
-        size: number of records per page (optional, default: 1000) \n
-        query: search by name of district/commune (optional)
+        provinceCode: code of province
     `,
   })
-  @ApiQuery({
-    name: 'provinceId',
-    description: 'Id of province',
-    required: false,
-    type: 'number',
-  })
-  @ApiQuery({
-    name: 'page',
-    description: 'Number of records per page',
-    required: false,
-    type: 'number',
-  })
-  @ApiQuery({
-    name: 'size',
-    description: 'Number of records per page',
-    required: false,
-    type: 'number',
-  })
-  @ApiQuery({
-    name: 'query',
-    description: 'Search by name of district/commune',
-    required: false,
-    type: 'string',
-    example: 'Hải Châu',
-  })
-  @UsePipes(OptionalValidationPipe)
-  async getAllDistricts(
-    @Query('provinceId') provinceId?: number,
-    @Query('page') page?: number,
-    @Query('size') size?: number,
-    @Query('query') query?: string,
+  async getDistrictByProvinceCode(
+    @Param('provinceCode', PositiveIntPipe) provinceCode: number,
   ) {
-    return await this.districtService.getAllDistricts(
-      provinceId,
-      page,
-      size,
-      query,
-    );
+    return await this.districtService.getDistrictByProvinceCode(provinceCode);
   }
 }

@@ -25,7 +25,7 @@ export enum WardType {
 }
 
 export enum AddressAPI {
-  PROVINCE_API = 'https://open.oapi.vn/location/provinces',
-  DISTRICT_API = 'https://open.oapi.vn/location/districts',
+  PROVINCE_API = 'https://provinces.open-api.vn/api/v1/p/',
+  DISTRICT_API = 'https://provinces.open-api.vn/api/v1/d/',
   WARD_API = 'https://open.oapi.vn/location/wards',
 }

@@ -1,62 +1,25 @@
-import { Controller, Get, Query, UsePipes } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { WardService } from './ward.service';
-import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Tag } from 'src/constants/api-tag.enum';
 import { Public } from 'src/decorators/public-route';
-import { OptionalValidationPipe } from 'src/pipe/optional-validation.pipe';
+import { PositiveIntPipe } from 'src/pipe/positive-integer.pipe';
 @Controller('ward')
 @ApiTags(Tag.WARD)
 @Public()
 export class WardController {
   constructor(private readonly wardService: WardService) {}
 
-  @Get()
+  @Get(':districtCode')
   @ApiOperation({
-    summary: 'Get all ward or search by name, districtId',
+    summary: 'Get ward by districtCode',
     description: `Get all ward filters by  \n
-          districtId: id of the district(optional) \n
-          page: page number(optional, default: 0) \n
-          size: Number of records per page(optional, default: 1000) \n
-          search: search by name (optional) \n
+          districtCode: code of the district
     `,
   })
-  @ApiQuery({
-    name: 'districtId',
-    description: 'Id of district',
-    required: false,
-    type: 'number',
-  })
-  @ApiQuery({
-    name: 'page',
-    description: 'page number',
-    required: false,
-    type: 'number',
-  })
-  @ApiQuery({
-    name: 'size',
-    description: 'Number of records per page',
-    required: false,
-    type: 'number',
-  })
-  @ApiQuery({
-    name: 'query',
-    description: 'Search by name of ward',
-    required: false,
-    type: 'string',
-    example: 'Hòa cường nam',
-  })
-  @UsePipes(OptionalValidationPipe)
-  async getAllWard(
-    @Query('districtId') districtId?: number,
-    @Query('page') page?: number,
-    @Query('size') size?: number,
-    @Query('query') query?: string,
+  async getWardByDistrictCode(
+    @Param('districtCode', PositiveIntPipe) districtCode: number,
   ) {
-    return await this.wardService.getAllDistricts(
-      districtId,
-      page,
-      size,
-      query,
-    );
+    return await this.wardService.getWardByDistrictCode(districtCode);
   }
 }
