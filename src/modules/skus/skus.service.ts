@@ -92,7 +92,6 @@ export class SkusService {
         ])
         .getManyAndCount();
       const totalPage = Math.ceil(total / pageSize);
-      console.log(queryBuilder.getSql());
       return {
         status: 200,
         message: 'Lấy danh sách SKU thành công',

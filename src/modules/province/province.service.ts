@@ -1,22 +1,22 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { AddressAPI } from 'src/constants/address.enum';
+import { ResponseProvince } from './dto/province.response';
 
 @Injectable()
 export class ProvinceService {
-  async getAllProvinces(page?: number, size?: number, query?: string) {
+  async getAllProvinces() {
     try {
-      let paramQuery = '';
-      if (!page) page = 0;
-      if (!size) size = 1000;
-      if (query) paramQuery = `?page=${page}&size=${size}&query=${query}`;
-      else paramQuery = `?page=${page}&size=${size}`;
-      const response = await fetch(AddressAPI.PROVINCE_API + paramQuery, {
+      const response = await fetch(AddressAPI.PROVINCE_API, {
         method: 'GET',
       });
-      const data = await response.json();
-      if (!data.data || data.data.length === 0)
-        throw new NotFoundException('Could not find any province');
-      return data;
+
+      const data: ResponseProvince[] = await response.json();
+      const provinces =
+        data?.map((p) => ({
+          name: p.name,
+          code: p.code,
+        })) || [];
+      return provinces;
     } catch (e) {
       throw e;
     }

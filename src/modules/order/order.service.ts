@@ -443,7 +443,6 @@ export class OrderService {
           key,
           value: order_status[key],
         }));
-      console.log('orderStatus', orderStatus);
       return {
         status: 200,
         message: 'Order status has been successfully retrieved',

@@ -22,7 +22,6 @@ export class CustomMailService {
       });
 
       if (response?.accepted && response?.accepted?.length > 0) {
-        console.log('✅ Gửi mail thành công:');
         return {
           success: true,
           message: 'Gửi mail thành công. Hãy kiểm tra hộp thoại',

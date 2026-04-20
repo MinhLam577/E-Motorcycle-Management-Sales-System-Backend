@@ -11343,88 +11343,30 @@
     "/api/v1/province": {
       "get": {
         "operationId": "ProvinceController_getAllProvinces",
-        "summary": "Get all provinces or search by name, slug",
-        "description": "Get provinces by filters\n\n        page: current page (optional, default: 0) \n\n        size: number of records per page (optional, default: 1000) \n\n        query: search by name, slug (optional) \n    ",
-        "parameters": [
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "description": "Current page",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "size",
-            "required": false,
-            "in": "query",
-            "description": "Number of records per page",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "query",
-            "required": false,
-            "in": "query",
-            "description": "Search by name, slug",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "summary": "Get all provinces",
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
           }
         },
         "tags": [
-          "Province"
+          "PROVINCE"
         ]
       }
     },
-    "/api/v1/district": {
+    "/api/v1/district/{provinceCode}": {
       "get": {
-        "operationId": "DistrictController_getAllDistricts",
-        "summary": "Get all district or search by name, Id of province",
-        "description": "Get all district by filters \n\n        provinceId: id of province \n\n        page: current page (optional, default: 0) \n\n        size: number of records per page (optional, default: 1000) \n\n        query: search by name of district/commune (optional)\n    ",
+        "operationId": "DistrictController_getDistrictByProvinceCode",
+        "summary": "Get district by province code",
+        "description": "Get all district by filters \n\n        provinceCode: code of province\n    ",
         "parameters": [
           {
-            "name": "provinceId",
-            "required": false,
-            "in": "query",
-            "description": "Id of province",
+            "name": "provinceCode",
+            "required": true,
+            "in": "path",
             "schema": {
               "type": "number"
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "description": "Number of records per page",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "size",
-            "required": false,
-            "in": "query",
-            "description": "Number of records per page",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "query",
-            "required": false,
-            "in": "query",
-            "description": "Search by name of district/commune",
-            "schema": {
-              "example": "Hải Châu",
-              "type": "string"
             }
           }
         ],
@@ -11438,47 +11380,18 @@
         ]
       }
     },
-    "/api/v1/ward": {
+    "/api/v1/ward/{districtCode}": {
       "get": {
-        "operationId": "WardController_getAllWard",
-        "summary": "Get all ward or search by name, districtId",
-        "description": "Get all ward filters by  \n\n          districtId: id of the district(optional) \n\n          page: page number(optional, default: 0) \n\n          size: Number of records per page(optional, default: 1000) \n\n          search: search by name (optional) \n\n    ",
+        "operationId": "WardController_getWardByDistrictCode",
+        "summary": "Get ward by districtCode",
+        "description": "Get all ward filters by  \n\n          districtCode: code of the district\n    ",
         "parameters": [
           {
-            "name": "districtId",
-            "required": false,
-            "in": "query",
-            "description": "Id of district",
+            "name": "districtCode",
+            "required": true,
+            "in": "path",
             "schema": {
               "type": "number"
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "description": "page number",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "size",
-            "required": false,
-            "in": "query",
-            "description": "Number of records per page",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "query",
-            "required": false,
-            "in": "query",
-            "description": "Search by name of ward",
-            "schema": {
-              "example": "Hòa cường nam",
-              "type": "string"
             }
           }
         ],
