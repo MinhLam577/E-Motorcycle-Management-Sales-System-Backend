@@ -49,6 +49,7 @@ import { ISendMailOptions } from '@nestjs-modules/mailer';
 import { getExpireMinutes } from 'src/helpers/datetime.format';
 import { ProfileFacebook } from 'src/types/facebook-oaut.type';
 import { Response } from 'express';
+import BasicResetPassword from './dto/basic-reset-password';
 @Injectable()
 export class AuthService {
   constructor(
@@ -907,5 +908,41 @@ export class AuthService {
     } catch (error) {
       throw error;
     }
+  }
+
+  async basicResetPassword({
+    oldPassword,
+    newPassword,
+    id,
+  }: BasicResetPassword): Promise<ResponseFunc> {
+    const user = await this.userService.getUser(id);
+
+    if (!user) {
+      throw new UnauthorizedException('User hoặc token không hợp lệ');
+    }
+
+    // Kiểm tra mật khẩu cũ
+    const isMatch = compareSync(oldPassword, user.password);
+
+    if (!isMatch) {
+      throw new BadRequestException('Mật khẩu cũ không chính xác');
+    }
+
+    const hashedPassword = await hashPasswordFunc({
+      password: newPassword,
+    });
+
+    await this.usersRepository.manager.transaction(async (manager) => {
+      user.password = hashedPassword;
+      user.codeId = null;
+      user.codeExprided = null;
+
+      await manager.save(user);
+    });
+
+    return {
+      status: 200,
+      message: 'Mật khẩu đã được đặt lại thành công',
+    };
   }
 }

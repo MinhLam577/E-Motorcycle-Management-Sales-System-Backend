@@ -4,10 +4,14 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
+  Patch,
   Post,
   Query,
   Req,
+  Request,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -24,11 +28,12 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
+  ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { Tag } from 'src/constants/api-tag.enum';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { ResponseMessage } from 'src/decorators/response_message.decorator';
 import EmailDto from './dto/email-format.dto';
 import { ConfigService } from '@nestjs/config';
@@ -38,6 +43,14 @@ import VerifyResetPasswordDto from './dto/verify-reset-password.dto';
 import { ProfileFacebook } from 'src/types/facebook-oaut.type';
 import { FacebookAuthGuard } from './gaurds/facebook-oauth.guard';
 import { JwtAuthGuard } from './gaurds/jwt-auth.guard';
+import { User } from 'src/decorators/current-user';
+import { JwtService } from '@nestjs/jwt';
+import { UserService } from 'src/modules/user/user.service';
+import { CustomersService } from 'src/modules/customers/customers.service';
+import { BaseUser, UserResponse } from 'src/types/auth-validate.type';
+import { RoleEnum } from 'src/constants/role.enum';
+import { Permission } from 'src/modules/permission/entities/permission.entity';
+import BasicResetPassword from './dto/basic-reset-password';
 
 @Public()
 @ApiTags(Tag.AUTHENTICATE)
@@ -46,6 +59,8 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
+    private readonly customerService: CustomersService,
   ) {}
 
   @ApiOperation({
@@ -270,9 +285,36 @@ export class AuthController {
   }
 
   @Get('me')
-  @UseGuards(JwtAuthGuard)
-  getMe(@Req() req) {
-    return req.user;
+  async getMe(@Req() req) {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+      throw new UnauthorizedException('No token');
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    try {
+      const payload = this.jwtService.verify(token);
+      let user = await this.customerService.getCustomerByEmail(payload.email);
+      let roleName: RoleEnum = RoleEnum.USER;
+      const userResponse: UserResponse = {
+        userId: user.id,
+        username: user.username,
+        email: user.email,
+        Roles: roleName,
+        avatarUrl: user.avatarUrl,
+        age: user.age,
+        gender: user.gender,
+        isActice: user.isActice,
+        birthday: user.birthday,
+        phoneNumber: user.phoneNumber,
+      };
+
+      return userResponse;
+    } catch (e) {
+      throw new UnauthorizedException('Invalid token');
+    }
   }
 
   @Get('/facebook')
@@ -281,7 +323,7 @@ export class AuthController {
 
   @Get('/facebook/redirect')
   @UseGuards(FacebookAuthGuard)
-  async facebookLoginRedirect(@Req() req: Request, @Res() res: Response) {
+  async facebookLoginRedirect(@Req() req, @Res() res: Response) {
     const { error } = req.query;
 
     if (error) {
@@ -341,6 +383,19 @@ export class AuthController {
   async resetPassword(@Body() body: ResetPassword) {
     return this.authService.resetPassword({
       token: body.token,
+      newPassword: body.newPassword,
+    });
+  }
+
+  @ApiOperation({
+    summary: 'Thay đổi lại mật khẩu',
+  })
+  @ApiBearerAuth()
+  @Patch('admin/reset-password-basic')
+  async basicResetPassword(@Body() body: BasicResetPassword) {
+    return this.authService.basicResetPassword({
+      id: body.id,
+      oldPassword: body.oldPassword,
       newPassword: body.newPassword,
     });
   }
