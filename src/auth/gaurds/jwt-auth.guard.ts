@@ -26,19 +26,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context);
   }
 
-  // getRequest(context: ExecutionContext) {
-  //   const ctx = context.switchToHttp();
-  //   const request = ctx.getRequest();
-
-  //   return request.raw ?? request;
-  // }
-
-  // handleRequest(err, user, info, context: ExecutionContext) {
-  //   if (err || !user) {
-  //     throw err || new UnauthorizedException('Invalid access token');
-  //   }
-  //   const req = context.switchToHttp().getRequest();
-  //   req.user = user;
-  //   return user;
-  // }
+  handleRequest(err, user, info, context: ExecutionContext) {
+    if (err || !user) {
+      throw err || new UnauthorizedException('Invalid access token');
+    }
+    return user;
+  }
 }

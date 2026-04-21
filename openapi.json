@@ -583,6 +583,36 @@
         ]
       }
     },
+    "/api/v1/auth/admin/reset-password-basic": {
+      "patch": {
+        "operationId": "AuthController_basicResetPassword",
+        "summary": "Thay đổi lại mật khẩu",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BasicResetPassword"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AUTHENTICATE"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/users/create/uploadImage": {
       "post": {
         "operationId": "UserController_uploadImage",
@@ -12600,6 +12630,31 @@
         "required": [
           "token",
           "newPassword"
+        ]
+      },
+      "BasicResetPassword": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "",
+            "description": "id user"
+          },
+          "newPassword": {
+            "type": "string",
+            "example": "",
+            "description": "Mật khẩu mới"
+          },
+          "oldPassword": {
+            "type": "string",
+            "example": "",
+            "description": "Mật khẩu cũ"
+          }
+        },
+        "required": [
+          "id",
+          "newPassword",
+          "oldPassword"
         ]
       },
       "UploadImageReponseDto": {

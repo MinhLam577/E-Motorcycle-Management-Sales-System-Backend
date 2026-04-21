@@ -4,6 +4,8 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
+  Patch,
   Post,
   Query,
   Req,
@@ -26,6 +28,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
+  ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -47,6 +50,7 @@ import { CustomersService } from 'src/modules/customers/customers.service';
 import { BaseUser, UserResponse } from 'src/types/auth-validate.type';
 import { RoleEnum } from 'src/constants/role.enum';
 import { Permission } from 'src/modules/permission/entities/permission.entity';
+import BasicResetPassword from './dto/basic-reset-password';
 
 @Public()
 @ApiTags(Tag.AUTHENTICATE)
@@ -379,6 +383,19 @@ export class AuthController {
   async resetPassword(@Body() body: ResetPassword) {
     return this.authService.resetPassword({
       token: body.token,
+      newPassword: body.newPassword,
+    });
+  }
+
+  @ApiOperation({
+    summary: 'Thay đổi lại mật khẩu',
+  })
+  @ApiBearerAuth()
+  @Patch('admin/reset-password-basic')
+  async basicResetPassword(@Body() body: BasicResetPassword) {
+    return this.authService.basicResetPassword({
+      id: body.id,
+      oldPassword: body.oldPassword,
       newPassword: body.newPassword,
     });
   }
