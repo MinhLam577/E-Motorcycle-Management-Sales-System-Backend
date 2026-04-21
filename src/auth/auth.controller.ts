@@ -37,6 +37,7 @@ import ResetPassword from './dto/reset-password.dto';
 import VerifyResetPasswordDto from './dto/verify-reset-password.dto';
 import { ProfileFacebook } from 'src/types/facebook-oaut.type';
 import { FacebookAuthGuard } from './gaurds/facebook-oauth.guard';
+import { JwtAuthGuard } from './gaurds/jwt-auth.guard';
 
 @Public()
 @ApiTags(Tag.AUTHENTICATE)
@@ -264,8 +265,14 @@ export class AuthController {
   })
   async googleCallback(@Req() req, @Res() res: Response) {
     const user = await this.authService.validateGoogleUser(req.user);
-    let Fe_Url = `${appConfig().FE_URL_USER}/success?token=${user.access_token}`;
+    let Fe_Url = `${appConfig().FE_URL_USER}/success?token=${user.access_token}&refresh_token=${user.refresh_token}`;
     return res.redirect(Fe_Url);
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  getMe(@Req() req) {
+    return req.user;
   }
 
   @Get('/facebook')
