@@ -54,12 +54,7 @@ export class OptionValueService {
       .getMany();
   }
 
-  // findOne(productId: number) {
-  //   return `This action returns a #${productId} optionValue`;
-  // }
   async findOnebyIdproduct(productId: string) {
-    console.log(productId);
-
     const result = await this.optionValueRepository
       .createQueryBuilder('option_value')
       .leftJoinAndSelect('option_value.option', 'option')

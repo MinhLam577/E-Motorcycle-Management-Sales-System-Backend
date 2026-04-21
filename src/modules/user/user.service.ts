@@ -295,11 +295,9 @@ export class UserService {
   }
 
   async uploadAvatar(file: Express.Multer.File, user: any) {
-    console.log('user', user);
     // return user;
     const { email } = user;
     const userInfo = await this.getUser1(email);
-    console.log(userInfo);
     const publicId = extractPublicId(userInfo.avatarUrl);
 
     if (publicId !== 'User/default') {

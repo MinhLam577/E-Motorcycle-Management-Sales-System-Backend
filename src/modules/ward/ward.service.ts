@@ -3,26 +3,18 @@ import { AddressAPI } from 'src/constants/address.enum';
 
 @Injectable()
 export class WardService {
-  async getAllDistricts(
-    districtId?: number,
-    page?: number,
-    size?: number,
-    query?: string,
-  ) {
+  async getWardByDistrictCode(districtCode?: number) {
     try {
-      let paramQuery = '';
-      if (!page) page = 0;
-      if (!size) size = 1000;
-      if (districtId) paramQuery += '/' + districtId;
-      if (query) paramQuery += `?page=${page}&size=${size}&query=${query}`;
-      else paramQuery += `?page=${page}&size=${size}`;
-      const response = await fetch(AddressAPI.WARD_API + paramQuery, {
+      const query = AddressAPI.DISTRICT_API + districtCode + '?depth=2';
+      const response = await fetch(query, {
         method: 'GET',
       });
       const data = await response.json();
-      if (!data.data || data.data.length === 0)
-        throw new NotFoundException('Could not find any ward');
-      return data;
+      const wards = data?.wards?.map((w) => ({
+        name: w.name,
+        code: w.code,
+      }));
+      return wards;
     } catch (e) {
       throw e;
     }

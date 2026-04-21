@@ -179,7 +179,6 @@ export class BrandService {
       if (!url || !url.match(/^https?:\/\//)) {
         throw new BadRequestException('URL không hợp lệ');
       }
-      console.log('Converting URL to Base64:', url);
       const response = await fetch(url);
       if (!response.ok) {
         throw new BadRequestException('URL không hợp lệ hoặc không tồn tại');

@@ -154,7 +154,6 @@ export class BranchService {
   }
 
   async uploadImage(image: Express.Multer.File) {
-    console.log(image);
     const folder = 'Branch/branchImage';
     const uploadResult = await this.cloudinaryService.uploadFile(image, folder);
 
